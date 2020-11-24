@@ -46,7 +46,6 @@ func callModelStatus(ctx context.Context, client tfproto.ModelServiceClient, mod
 		},
 	}
 	response, err := client.GetModelStatus(ctx, request)
-	log.Printf("response: %v\n", response)
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +57,7 @@ func checkServableResponse(response *tfproto.GetModelStatusResponse, modelVersio
 
 	// Ensure non-empty response
 	if len(response.ModelVersionStatus) == 0 {
+		log.Println("Empty response")
 		return 11
 	}
 
@@ -79,6 +79,7 @@ func checkServableResponse(response *tfproto.GetModelStatusResponse, modelVersio
 
 	// No matching version found? Return early.
 	if !statusFound {
+		log.Printf("No matching response found for version: %v\n", modelVersion)
 		return 12
 	}
 
@@ -88,18 +89,25 @@ func checkServableResponse(response *tfproto.GetModelStatusResponse, modelVersio
 	switch status {
 	case tfproto.ModelVersionStatus_AVAILABLE:
 		// servable is up and ready
+		log.Println("Servable state is AVAILABLE")
 		retval = 0
 	case tfproto.ModelVersionStatus_UNKNOWN:
+		log.Println("Servable state is UNKNOWN")
 		retval = 30
 	case tfproto.ModelVersionStatus_START:
+		log.Println("Servable state is START")
 		retval = 31
 	case tfproto.ModelVersionStatus_LOADING:
+		log.Println("Servable state is LOADING")
 		retval = 32
 	case tfproto.ModelVersionStatus_UNLOADING:
+		log.Println("Servable state is UNLOADING")
 		retval = 33
 	case tfproto.ModelVersionStatus_END:
+		log.Println("Servable state is END")
 		retval = 34
 	default:
+		log.Println("Servable state is unexpected")
 		retval = 100 // unexpected
 	}
 
@@ -140,6 +148,7 @@ func main() {
 
 	// call model status
 	modelStatusResponse, err := callModelStatus(ctxRpc, client, modelName)
+	log.Printf("ModelStatusResponse: %v\n", modelStatusResponse)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
 			log.Printf("Model not found: %v\n", err)
@@ -151,7 +160,6 @@ func main() {
 
 	// check response for servable status
 	retval := checkServableResponse(modelStatusResponse, modelVersion)
-	log.Printf("debug: %v\n", retval)
 	os.Exit(retval)
 
 }

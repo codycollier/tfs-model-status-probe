@@ -9,6 +9,6 @@ import (
 )
 
 func TestEmptyResponse(t *testing.T) {
-	r := checkResponse(&tfproto.GetModelStatusResponse{})
+	r := checkServableResponse(&tfproto.GetModelStatusResponse{})
 	assert.Equal(t, 0, r, "Expecting 0 response code")
 }

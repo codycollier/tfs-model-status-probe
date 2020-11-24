@@ -24,6 +24,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/codycollier/tfs-model-status-probe/tfproto/tfproto"
 )
@@ -37,8 +39,13 @@ var (
 
 // Call ModelService.GetModelStatus() and return response
 func callModelStatus(ctx context.Context, client tfproto.ModelServiceClient, model string) (*tfproto.GetModelStatusResponse, error) {
-	request := &tfproto.GetModelStatusRequest{}
+	request := &tfproto.GetModelStatusRequest{
+		ModelSpec: &tfproto.ModelSpec{
+			Name: model,
+		},
+	}
 	response, err := client.GetModelStatus(ctx, request)
+	log.Printf("response: %v\n", response)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +53,7 @@ func callModelStatus(ctx context.Context, client tfproto.ModelServiceClient, mod
 }
 
 // Parse the proto msg response and map to an appropriate return value
-func checkResponse(response *tfproto.GetModelStatusResponse) int {
+func checkServableResponse(response *tfproto.GetModelStatusResponse) int {
 
 	// Handle gRPC level errors
 
@@ -90,14 +97,16 @@ func main() {
 	// call model status
 	modelStatusResponse, err := callModelStatus(ctxRpc, client, modelName)
 	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			log.Printf("Model not found: %v\n", err)
+			os.Exit(10)
+		}
 		log.Printf("Error calling tfs: %v\n", err)
 		os.Exit(3)
 	}
 
 	// check response for servable status
-	retval := checkResponse(modelStatusResponse)
-
-	//
+	retval := checkServableResponse(modelStatusResponse)
 	os.Exit(retval)
 
 }

@@ -29,12 +29,14 @@ import (
 )
 
 var (
-	flModel = flag.String("model", "default", "The name of the model")
-	flAddr  = flag.String("addr", "localhost:9000", "The hostname:port to check")
+	flModel          = flag.String("model", "default", "The name of the model")
+	flAddr           = flag.String("addr", "localhost:9000", "The hostname:port to check")
+	flConnectTimeout = flag.Duration("connect-timeout", time.Second*3, "Timeout for making connection")
+	flRpcTimeout     = flag.Duration("rpc-timeout", time.Second*10, "Timeout for rpc call")
 )
 
 // Call ModelService.GetModelStatus() and return response
-func callTFS(ctx context.Context, client tfproto.ModelServiceClient, model string) (*tfproto.GetModelStatusResponse, error) {
+func callModelStatus(ctx context.Context, client tfproto.ModelServiceClient, model string) (*tfproto.GetModelStatusResponse, error) {
 	request := &tfproto.GetModelStatusRequest{}
 	response, err := client.GetModelStatus(ctx, request)
 	if err != nil {
@@ -56,35 +58,43 @@ func checkResponse(response *tfproto.GetModelStatusResponse) int {
 
 func main() {
 
-	// Check command line args
+	// Process command line args
 	flag.Parse()
 	addr := *flAddr
 	modelName := *flModel
+	connectTimeout := *flConnectTimeout
+	rpcTimeout := *flRpcTimeout
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
+	// set a timeout on the connection
+	ctxDial, cancelDial := context.WithTimeout(context.Background(), connectTimeout)
+	defer cancelDial()
 
-	// gRPC connection setup
+	// grpc connection
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure())
-	conn, err := grpc.Dial(addr, opts...)
+	opts = append(opts, grpc.WithBlock())
+	conn, err := grpc.DialContext(ctxDial, addr, opts...)
 	if err != nil {
 		log.Printf("Error dialing grpc service: %v\n", err)
 		os.Exit(2)
 	}
 	defer conn.Close()
 
-	// tfs grpc client setup
+	// grpc client
 	client := tfproto.NewModelServiceClient(conn)
 
-	// call
-	modelStatusResponse, err := callTFS(ctx, client, modelName)
+	// set a timeout on the rpc
+	ctxRpc, cancelRpc := context.WithTimeout(context.Background(), rpcTimeout)
+	defer cancelRpc()
+
+	// call model status
+	modelStatusResponse, err := callModelStatus(ctxRpc, client, modelName)
 	if err != nil {
 		log.Printf("Error calling tfs: %v\n", err)
 		os.Exit(3)
 	}
 
-	// check
+	// check response for servable status
 	retval := checkResponse(modelStatusResponse)
 
 	//

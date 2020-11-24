@@ -5,7 +5,7 @@ option go_package = ".;tfproto";
 
 import "get_model_status.proto";
 
-package tfproto;
+package tensorflow.serving;
 
 // ModelService provides methods to query and update the state of the server,
 // e.g. which models/versions are being served.

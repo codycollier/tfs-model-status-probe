@@ -6,7 +6,7 @@ option go_package = ".;tfproto";
 import "model.proto";
 import "status.proto";
 
-package tfproto;
+package tensorflow.serving;
 
 // GetModelStatusRequest contains a ModelSpec indicating the model for which
 // to get status.

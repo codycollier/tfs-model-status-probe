@@ -18,12 +18,12 @@ help:
 .PHONY: proto-lint
 proto-lint:
 	@echo "Running linter on proto.  No output is good."
-	cd ./proto/tfproto/ \
+	cd ./tfproto/tfproto/ \
 	&& protoc --lint_out=./ -I. *.proto
 
 .PHONY: proto
 proto:
-	cd ./proto/tfproto/ \
+	cd ./tfproto/tfproto/ \
 	&& protoc --go_out=. --go_opt=plugins=grpc -I. *proto
 
 build:

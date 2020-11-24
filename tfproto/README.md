@@ -43,7 +43,6 @@ Original sources:
 
 The corresponding `.proto` files in `./tfproto/` were modified slightly from the original source to allow for easier protoc compilation and generation of simple, flat golang package. Changes included:
 
-* changed proto package name
 * updates to proto import paths
 * addition/update to proto go_package definition
 * removal of model management rpc and import in model_service.proto

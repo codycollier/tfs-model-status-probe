@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package tfproto;
+package tensorflow.serving;
 option cc_enable_arenas = true;
 option go_package = ".;tfproto";
 

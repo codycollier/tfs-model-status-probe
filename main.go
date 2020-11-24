@@ -99,7 +99,7 @@ func main() {
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
 			log.Printf("Model not found: %v\n", err)
-			os.Exit(10)
+			os.Exit(5)
 		}
 		log.Printf("Error calling tfs: %v\n", err)
 		os.Exit(3)

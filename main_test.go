@@ -10,8 +10,21 @@ import (
 
 func TestResponseEmpty(t *testing.T) {
 	request := &tfproto.GetModelStatusResponse{}
-	retval := checkServableResponse(request)
-	assert.Equal(t, 8, retval, "Expecting response code for empty")
+	retval := checkServableResponse(request, 0)
+	assert.Equal(t, 303, retval, "Expecting response code for empty")
+}
+
+func TestResponseMissingVersion(t *testing.T) {
+	request := &tfproto.GetModelStatusResponse{
+		ModelVersionStatus: []*tfproto.ModelVersionStatus{
+			{
+				Version: 100,
+				State:   tfproto.ModelVersionStatus_UNKNOWN,
+			},
+		},
+	}
+	retval := checkServableResponse(request, 300)
+	assert.Equal(t, 304, retval, "Expecting response code for empty")
 }
 
 func TestResponseStateUnknown(t *testing.T) {
@@ -23,8 +36,8 @@ func TestResponseStateUnknown(t *testing.T) {
 			},
 		},
 	}
-	retval := checkServableResponse(request)
-	assert.Equal(t, 10, retval, "Expecting response code for state Unknown")
+	retval := checkServableResponse(request, 0)
+	assert.Equal(t, 310, retval, "Expecting response code for state Unknown")
 }
 
 func TestResponseStateStart(t *testing.T) {
@@ -36,8 +49,8 @@ func TestResponseStateStart(t *testing.T) {
 			},
 		},
 	}
-	retval := checkServableResponse(request)
-	assert.Equal(t, 20, retval, "Expecting response code for state Start")
+	retval := checkServableResponse(request, 0)
+	assert.Equal(t, 320, retval, "Expecting response code for state Start")
 }
 
 func TestResponseStateLoading(t *testing.T) {
@@ -49,8 +62,8 @@ func TestResponseStateLoading(t *testing.T) {
 			},
 		},
 	}
-	retval := checkServableResponse(request)
-	assert.Equal(t, 30, retval, "Expecting response code for Loading")
+	retval := checkServableResponse(request, 0)
+	assert.Equal(t, 330, retval, "Expecting response code for Loading")
 }
 
 func TestResponseStateUnloading(t *testing.T) {
@@ -62,8 +75,8 @@ func TestResponseStateUnloading(t *testing.T) {
 			},
 		},
 	}
-	retval := checkServableResponse(request)
-	assert.Equal(t, 40, retval, "Expecting response code for state Unloading")
+	retval := checkServableResponse(request, 0)
+	assert.Equal(t, 340, retval, "Expecting response code for state Unloading")
 }
 
 func TestResponseStateEnd(t *testing.T) {
@@ -75,8 +88,8 @@ func TestResponseStateEnd(t *testing.T) {
 			},
 		},
 	}
-	retval := checkServableResponse(request)
-	assert.Equal(t, 50, retval, "Expecting response code for state End")
+	retval := checkServableResponse(request, 0)
+	assert.Equal(t, 350, retval, "Expecting response code for state End")
 }
 
 func TestResponseStateAvailable(t *testing.T) {
@@ -88,6 +101,48 @@ func TestResponseStateAvailable(t *testing.T) {
 			},
 		},
 	}
-	retval := checkServableResponse(request)
+	retval := checkServableResponse(request, 0)
 	assert.Equal(t, 0, retval, "Expecting response code for state Available")
+}
+
+func TestResponseStateAvailableOnSpecificVersion(t *testing.T) {
+
+	request := &tfproto.GetModelStatusResponse{
+		ModelVersionStatus: []*tfproto.ModelVersionStatus{
+			{
+				Version: 101,
+				State:   tfproto.ModelVersionStatus_END,
+			},
+			{
+				Version: 301,
+				State:   tfproto.ModelVersionStatus_AVAILABLE,
+			},
+		},
+	}
+	retval := checkServableResponse(request, 0)
+	assert.Equal(t, 350, retval)
+	retval = checkServableResponse(request, 101)
+	assert.Equal(t, 350, retval)
+	retval = checkServableResponse(request, 301)
+	assert.Equal(t, 0, retval)
+
+	request = &tfproto.GetModelStatusResponse{
+		ModelVersionStatus: []*tfproto.ModelVersionStatus{
+			{
+				Version: 301,
+				State:   tfproto.ModelVersionStatus_AVAILABLE,
+			},
+			{
+				Version: 101,
+				State:   tfproto.ModelVersionStatus_END,
+			},
+		},
+	}
+	retval = checkServableResponse(request, 0)
+	assert.Equal(t, 0, retval)
+	retval = checkServableResponse(request, 101)
+	assert.Equal(t, 350, retval)
+	retval = checkServableResponse(request, 301)
+	assert.Equal(t, 0, retval)
+
 }

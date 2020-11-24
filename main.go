@@ -31,7 +31,8 @@ import (
 )
 
 var (
-	flModel          = flag.String("model", "default", "The name of the model")
+	flModelName      = flag.String("model-name", "default", "The name of the model")
+	flModelVersion   = flag.Int64("model-version", 0, "The version of the model")
 	flAddr           = flag.String("addr", "localhost:9000", "The hostname:port to check")
 	flConnectTimeout = flag.Duration("connect-timeout", time.Second*3, "Timeout for making connection")
 	flRpcTimeout     = flag.Duration("rpc-timeout", time.Second*10, "Timeout for rpc call")
@@ -53,14 +54,56 @@ func callModelStatus(ctx context.Context, client tfproto.ModelServiceClient, mod
 }
 
 // Parse the proto msg response and map to an appropriate return value
-func checkServableResponse(response *tfproto.GetModelStatusResponse) int {
+func checkServableResponse(response *tfproto.GetModelStatusResponse, modelVersion int64) int {
 
-	// Handle gRPC level errors
+	// Ensure non-empty response
+	if len(response.ModelVersionStatus) == 0 {
+		return 303
+	}
 
-	// Handle servable states in the response
+	// Get the state for the noted version. If no version, take the first.
+	var status tfproto.ModelVersionStatus_State
+	statusFound := false
+	if modelVersion == 0 {
+		status = response.ModelVersionStatus[0].State
+		statusFound = true
+	} else {
+		for _, res := range response.ModelVersionStatus {
+			if modelVersion == res.Version {
+				status = res.State
+				statusFound = true
+				break
+			}
+		}
+	}
+
+	// No matching version found? Return early.
+	if !statusFound {
+		return 304
+	}
+
+	// Map servable states to return value
 	// https://github.com/tensorflow/serving/blob/master/tensorflow_serving/apis/get_model_status.proto
+	var retval int
+	switch status {
+	case tfproto.ModelVersionStatus_AVAILABLE:
+		// servable is up and ready
+		retval = 0
+	case tfproto.ModelVersionStatus_UNKNOWN:
+		retval = 310
+	case tfproto.ModelVersionStatus_START:
+		retval = 320
+	case tfproto.ModelVersionStatus_LOADING:
+		retval = 330
+	case tfproto.ModelVersionStatus_UNLOADING:
+		retval = 340
+	case tfproto.ModelVersionStatus_END:
+		retval = 350
+	default:
+		retval = 500 // unexpected
+	}
 
-	return 0
+	return retval
 }
 
 func main() {
@@ -68,7 +111,8 @@ func main() {
 	// Process command line args
 	flag.Parse()
 	addr := *flAddr
-	modelName := *flModel
+	modelName := *flModelName
+	modelVersion := *flModelVersion
 	connectTimeout := *flConnectTimeout
 	rpcTimeout := *flRpcTimeout
 
@@ -99,14 +143,14 @@ func main() {
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
 			log.Printf("Model not found: %v\n", err)
-			os.Exit(5)
+			os.Exit(301)
 		}
 		log.Printf("Error calling tfs: %v\n", err)
 		os.Exit(3)
 	}
 
 	// check response for servable status
-	retval := checkServableResponse(modelStatusResponse)
+	retval := checkServableResponse(modelStatusResponse, modelVersion)
 	os.Exit(retval)
 
 }

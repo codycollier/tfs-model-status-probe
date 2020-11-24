@@ -11,7 +11,7 @@ import (
 func TestResponseEmpty(t *testing.T) {
 	request := &tfproto.GetModelStatusResponse{}
 	retval := checkServableResponse(request, 0)
-	assert.Equal(t, 303, retval, "Expecting response code for empty")
+	assert.Equal(t, 11, retval, "Expecting response code for empty")
 }
 
 func TestResponseMissingVersion(t *testing.T) {
@@ -24,7 +24,7 @@ func TestResponseMissingVersion(t *testing.T) {
 		},
 	}
 	retval := checkServableResponse(request, 300)
-	assert.Equal(t, 304, retval, "Expecting response code for empty")
+	assert.Equal(t, 12, retval, "Expecting response code for empty")
 }
 
 func TestResponseStateUnknown(t *testing.T) {
@@ -37,7 +37,7 @@ func TestResponseStateUnknown(t *testing.T) {
 		},
 	}
 	retval := checkServableResponse(request, 0)
-	assert.Equal(t, 310, retval, "Expecting response code for state Unknown")
+	assert.Equal(t, 30, retval, "Expecting response code for state Unknown")
 }
 
 func TestResponseStateStart(t *testing.T) {
@@ -50,7 +50,7 @@ func TestResponseStateStart(t *testing.T) {
 		},
 	}
 	retval := checkServableResponse(request, 0)
-	assert.Equal(t, 320, retval, "Expecting response code for state Start")
+	assert.Equal(t, 31, retval, "Expecting response code for state Start")
 }
 
 func TestResponseStateLoading(t *testing.T) {
@@ -63,7 +63,7 @@ func TestResponseStateLoading(t *testing.T) {
 		},
 	}
 	retval := checkServableResponse(request, 0)
-	assert.Equal(t, 330, retval, "Expecting response code for Loading")
+	assert.Equal(t, 32, retval, "Expecting response code for Loading")
 }
 
 func TestResponseStateUnloading(t *testing.T) {
@@ -76,7 +76,7 @@ func TestResponseStateUnloading(t *testing.T) {
 		},
 	}
 	retval := checkServableResponse(request, 0)
-	assert.Equal(t, 340, retval, "Expecting response code for state Unloading")
+	assert.Equal(t, 33, retval, "Expecting response code for state Unloading")
 }
 
 func TestResponseStateEnd(t *testing.T) {
@@ -89,7 +89,7 @@ func TestResponseStateEnd(t *testing.T) {
 		},
 	}
 	retval := checkServableResponse(request, 0)
-	assert.Equal(t, 350, retval, "Expecting response code for state End")
+	assert.Equal(t, 34, retval, "Expecting response code for state End")
 }
 
 func TestResponseStateAvailable(t *testing.T) {
@@ -120,9 +120,9 @@ func TestResponseStateAvailableOnSpecificVersion(t *testing.T) {
 		},
 	}
 	retval := checkServableResponse(request, 0)
-	assert.Equal(t, 350, retval)
+	assert.Equal(t, 34, retval)
 	retval = checkServableResponse(request, 101)
-	assert.Equal(t, 350, retval)
+	assert.Equal(t, 34, retval)
 	retval = checkServableResponse(request, 301)
 	assert.Equal(t, 0, retval)
 
@@ -141,7 +141,7 @@ func TestResponseStateAvailableOnSpecificVersion(t *testing.T) {
 	retval = checkServableResponse(request, 0)
 	assert.Equal(t, 0, retval)
 	retval = checkServableResponse(request, 101)
-	assert.Equal(t, 350, retval)
+	assert.Equal(t, 34, retval)
 	retval = checkServableResponse(request, 301)
 	assert.Equal(t, 0, retval)
 

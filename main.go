@@ -58,7 +58,7 @@ func checkServableResponse(response *tfproto.GetModelStatusResponse, modelVersio
 
 	// Ensure non-empty response
 	if len(response.ModelVersionStatus) == 0 {
-		return 303
+		return 11
 	}
 
 	// Get the state for the noted version. If no version, take the first.
@@ -79,7 +79,7 @@ func checkServableResponse(response *tfproto.GetModelStatusResponse, modelVersio
 
 	// No matching version found? Return early.
 	if !statusFound {
-		return 304
+		return 12
 	}
 
 	// Map servable states to return value
@@ -90,17 +90,17 @@ func checkServableResponse(response *tfproto.GetModelStatusResponse, modelVersio
 		// servable is up and ready
 		retval = 0
 	case tfproto.ModelVersionStatus_UNKNOWN:
-		retval = 310
+		retval = 30
 	case tfproto.ModelVersionStatus_START:
-		retval = 320
+		retval = 31
 	case tfproto.ModelVersionStatus_LOADING:
-		retval = 330
+		retval = 32
 	case tfproto.ModelVersionStatus_UNLOADING:
-		retval = 340
+		retval = 33
 	case tfproto.ModelVersionStatus_END:
-		retval = 350
+		retval = 34
 	default:
-		retval = 500 // unexpected
+		retval = 100 // unexpected
 	}
 
 	return retval
@@ -143,7 +143,7 @@ func main() {
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
 			log.Printf("Model not found: %v\n", err)
-			os.Exit(301)
+			os.Exit(10)
 		}
 		log.Printf("Error calling tfs: %v\n", err)
 		os.Exit(3)
@@ -151,6 +151,7 @@ func main() {
 
 	// check response for servable status
 	retval := checkServableResponse(modelStatusResponse, modelVersion)
+	log.Printf("debug: %v\n", retval)
 	os.Exit(retval)
 
 }

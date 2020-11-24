@@ -4,9 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/codycollier/tfs-model-status-probe/tfproto/tfproto"
 )
 
-func TestFoo(t *testing.T) {
-	r := checkResponse("foo")
+func TestEmptyResponse(t *testing.T) {
+	r := checkResponse(&tfproto.GetModelStatusResponse{})
 	assert.Equal(t, 0, r, "Expecting 0 response code")
 }

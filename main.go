@@ -17,11 +17,15 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"os"
+	"time"
 
 	"google.golang.org/grpc"
+
+	"github.com/codycollier/tfs-model-status-probe/tfproto/tfproto"
 )
 
 var (
@@ -30,14 +34,16 @@ var (
 )
 
 // Call ModelService.GetModelStatus() and return response
-func callTFS(model string, tfsclient string) string {
-	log.Printf("model-name: %s\n", model)
-	log.Printf("tfs-client: %s\n", tfsclient)
-	return "foo"
+func callTFS(ctx context.Context, client tfproto.ModelServiceClient, model string) *tfproto.GetModelStatusResponse {
+	request := &tfproto.GetModelStatusRequest{}
+	response, err := client.GetModelStatus(ctx, request)
+	if err != nil {
+	}
+	return response
 }
 
 // Parse the proto msg response and map to an appropriate return value
-func checkResponse(response string) int {
+func checkResponse(response *tfproto.GetModelStatusResponse) int {
 
 	// Handle gRPC level errors
 
@@ -54,6 +60,9 @@ func main() {
 	serviceName := *flService
 	modelName := *flModel
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
 	// gRPC connection setup
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure())
@@ -66,14 +75,13 @@ func main() {
 	defer conn.Close()
 
 	// tfs grpc client setup
-	// cl := pb.
-	tfsClient := "foo"
+	client := tfproto.NewModelServiceClient(conn)
 
 	// call
-	res := callTFS(modelName, tfsClient)
+	modelStatusResponse := callTFS(ctx, client, modelName)
 
 	// check
-	retval := checkResponse(res)
+	retval := checkResponse(modelStatusResponse)
 
 	//
 	os.Exit(retval)

@@ -29,17 +29,18 @@ import (
 )
 
 var (
-	flModel   = flag.String("model", "default", "The name of the model")
-	flService = flag.String("service", "localhost:9000", "The hostname:port of the service")
+	flModel = flag.String("model", "default", "The name of the model")
+	flAddr  = flag.String("addr", "localhost:9000", "The hostname:port to check")
 )
 
 // Call ModelService.GetModelStatus() and return response
-func callTFS(ctx context.Context, client tfproto.ModelServiceClient, model string) *tfproto.GetModelStatusResponse {
+func callTFS(ctx context.Context, client tfproto.ModelServiceClient, model string) (*tfproto.GetModelStatusResponse, error) {
 	request := &tfproto.GetModelStatusRequest{}
 	response, err := client.GetModelStatus(ctx, request)
 	if err != nil {
+		return nil, err
 	}
-	return response
+	return response, nil
 }
 
 // Parse the proto msg response and map to an appropriate return value
@@ -57,7 +58,7 @@ func main() {
 
 	// Check command line args
 	flag.Parse()
-	serviceName := *flService
+	addr := *flAddr
 	modelName := *flModel
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
@@ -66,10 +67,9 @@ func main() {
 	// gRPC connection setup
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure())
-	conn, err := grpc.Dial(serviceName, opts...)
+	conn, err := grpc.Dial(addr, opts...)
 	if err != nil {
-		log.Println("Error dialing grpc service")
-		log.Printf("Error: %v", err)
+		log.Printf("Error dialing grpc service: %v\n", err)
 		os.Exit(2)
 	}
 	defer conn.Close()
@@ -78,7 +78,11 @@ func main() {
 	client := tfproto.NewModelServiceClient(conn)
 
 	// call
-	modelStatusResponse := callTFS(ctx, client, modelName)
+	modelStatusResponse, err := callTFS(ctx, client, modelName)
+	if err != nil {
+		log.Printf("Error calling tfs: %v\n", err)
+		os.Exit(3)
+	}
 
 	// check
 	retval := checkResponse(modelStatusResponse)

@@ -1,0 +1,23 @@
+before:
+  hooks:
+  - go mod download
+builds:
+- id: tfs_model_status_probe
+  main: .
+  binary: tfs_model_status_probe
+  flags:
+  - -tags=netgo
+  ldflags:
+  - -w
+  env:
+  - CGO_ENABLED=0
+  goos:
+  - linux
+  goarch:
+  - 386
+  - amd64
+  - arm
+  - arm64
+  - ppc64le
+  - s390x
+  goarm: [6]

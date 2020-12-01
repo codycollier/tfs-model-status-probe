@@ -76,6 +76,42 @@ $ docker run -t --rm -p 8500:8500 -p 8501:8501 -v "$TESTMODEL" -e MODEL_NAME=hal
 ```
 
 
+## Integration with Kubernetes (exec probe)
+
+Kubernetes runs `exec` probes by executing a command within the target container.  This means the probe binary needs to be bundled inside the TensorFlow Serving image.  Below is an example docker file and an example kubernetes probe config.
+
+
+Sample Docker file:
+```
+FROM tensorflow/serving
+
+RUN apt-get update \
+    && apt-get -y install wget
+
+RUN TFS_PROBE_VERSION=1.0.1 \
+    && wget -qO /bin/tfs_model_status_probe https://github.com/codycollier/tfs-model-status-probe/releases/download/v${TFS_PROBE_VERSION}/tfs_model_status_probe_${TFS_PROBE_VERSION}_linux_amd64 \
+    && chmod +x /bin/tfs_model_status_probe
+```
+
+More recent kubernetes versions have a [startup probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes), which can be helpful when serving large, slow to load models.
+
+Sample kubernetes config (subset):
+```
+spec:
+  containers:
+  - name: server
+    startupProbe:
+      exec:
+        command: ["/bin/grpc_health_probe", "-addr=:8500", "-model-name=half_plus_two"]
+      failureThreshold: 30
+      periodSeconds: 10
+    livenessProbe:
+      exec:
+        command: ["/bin/grpc_health_probe", "-addr=:8500", "-model-name=half_plus_two"]
+      failureThreshold: 1
+      periodSeconds: 15
+```
+
 
 ## References
 

@@ -1,19 +1,19 @@
-// tfs_model_status_probe checks model status in a tensorflow serving service
 //
-// The tfs_model_status_probe is modeled after grpc_health_probe[1] and is
-// intended for use as a kubernetes probe for a TensorFlow Serving service. It
-// calls the ModelService.GetModelStatus() rpc for a given model and returns a
-// response code indicating success.
+// Copyright 2020 Cody Collier <cody@telnet.org>
 //
-// The ModelService service and GetModelStatus() rpc are built into the
-// TensorFlow Serving grpc server[2].
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  [1]
-//	https://github.com/grpc-ecosystem/grpc-health-probe
-//  [2]
-//	https://github.com/tensorflow/serving/blob/master/tensorflow_serving/apis/model_service.proto
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 //
+
 package main
 
 import (

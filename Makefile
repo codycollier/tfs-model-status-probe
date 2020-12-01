@@ -27,13 +27,12 @@ proto:
 	&& protoc --go_out=. --go_opt=plugins=grpc -I. *proto
 
 build:
-	GOBIN=$(PWD)/bin \
-		  go install ./...
+	go build -o ./bin/tfs_model_status_probe
 
 .PHONY: test
 test:
 	go vet ./...
-	go test ./...
+	go test .
 
 .PHONY: clean 
 clean:

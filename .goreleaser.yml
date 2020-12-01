@@ -1,12 +1,12 @@
 before:
   hooks:
   - go mod download
+
 archives:
 - format: binary
   files:
   - none*
   name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-
 
 builds:
 - id: tfs_model_status_probe
@@ -26,4 +26,3 @@ builds:
   - amd64
   - arm
   - arm64
-  goarm: [6]

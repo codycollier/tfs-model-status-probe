@@ -1,14 +1,14 @@
 
-## tfs_model_status_probe - TensorFlow Model Status Probe
+## tfs_model_status_probe - TensorFlow Serving Model Status Probe
 
 ![ci](https://github.com/codycollier/tfs-model-status-probe/workflows/ci/badge.svg)
 ![release](https://github.com/codycollier/tfs-model-status-probe/workflows/release/badge.svg)
 
 
 
-The `tfs_model_status_probe` checks the model status in a TensorFlow Serving [1] instance.  The probe is modeled after `grpc_health_probe` [2] and is intended for use as a kubernetes probe for a TensorFlow Serving service.
+The `tfs_model_status_probe` checks the model status in a TensorFlow Serving instance [1].  The probe is modeled after `grpc_health_probe` [2] and is intended for use as a kubernetes probe.
 
-The tfs model status probe calls the ModelService.GetModelStatus() rpc [3] for a given model.  If the model is `AVAILABLE`, then the probe will have an exit code of 0, conforming to k8s probe conventions.  If the model is still `LOADING`, in some other state, or there are grpc communication errors then the exit code will be non-zero.  If no version is provided, the probe assumes a single version is loaded and just checks the first version in the response.
+The probe calls the ModelService.GetModelStatus() rpc [3] for a given model.  If the model is `AVAILABLE`, then the probe will have an exit code of 0.  If the model is still `LOADING`, in some other state, or there are grpc communication errors, then the exit code will be non-zero.  If no version is provided, the probe assumes a single version and only checks the first version in the response.
 
 
 #### Usage

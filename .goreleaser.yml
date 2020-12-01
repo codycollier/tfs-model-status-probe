@@ -1,6 +1,13 @@
 before:
   hooks:
   - go mod download
+archives:
+- format: binary
+  files:
+  - none*
+  name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+
 builds:
 - id: tfs_model_status_probe
   main: .
@@ -12,12 +19,11 @@ builds:
   env:
   - CGO_ENABLED=0
   goos:
+  - darwin
   - linux
   goarch:
   - 386
   - amd64
   - arm
   - arm64
-  - ppc64le
-  - s390x
   goarm: [6]

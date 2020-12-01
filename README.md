@@ -1,7 +1,7 @@
 
 ## tfs_model_status_probe - TensorFlow Model Status Probe
 
-![ci foo](https://github.com/codycollier/tfs-model-status-probe/workflows/ci/badge.svg)
+![ci](https://github.com/codycollier/tfs-model-status-probe/workflows/ci/badge.svg)
 ![release](https://github.com/codycollier/tfs-model-status-probe/workflows/release/badge.svg)
 
 

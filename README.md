@@ -1,6 +1,10 @@
 
 ## tfs_model_status_probe - TensorFlow Model Status Probe
 
+![ci](https://github.com/codycollier/tfs-model-status-probe/workflows/ci/badge.svg)
+![release--](https://github.com/codycollier/tfs-model-status-probe/workflows/release/badge.svg)
+
+
 
 The `tfs_model_status_probe` checks the model status in a TensorFlow Serving [1] instance.  The probe is modeled after `grpc_health_probe` [2] and is intended for use as a kubernetes probe for a TensorFlow Serving service.
 

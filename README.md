@@ -102,12 +102,12 @@ spec:
   - name: server
     startupProbe:
       exec:
-        command: ["/bin/grpc_health_probe", "-addr=:8500", "-model-name=half_plus_two"]
+        command: ["/bin/tfs_model_status_probe", "-addr=:8500", "-model-name=half_plus_two"]
       failureThreshold: 30
       periodSeconds: 10
     livenessProbe:
       exec:
-        command: ["/bin/grpc_health_probe", "-addr=:8500", "-model-name=half_plus_two"]
+        command: ["/bin/tfs_model_status_probe", "-addr=:8500", "-model-name=half_plus_two"]
       failureThreshold: 1
       periodSeconds: 15
 ```

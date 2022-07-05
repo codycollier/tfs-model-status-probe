@@ -214,9 +214,7 @@ func TestResponseStateAvailableOnSpecificVersion(t *testing.T) {
 			},
 		},
 	}
-	retval := checkServableResponse(request, 0)
-	assert.Equal(t, 34, retval)
-	retval = checkServableResponse(request, 101)
+	retval := checkServableResponse(request, 101)
 	assert.Equal(t, 34, retval)
 	retval = checkServableResponse(request, 301)
 	assert.Equal(t, 0, retval)
@@ -233,8 +231,6 @@ func TestResponseStateAvailableOnSpecificVersion(t *testing.T) {
 			},
 		},
 	}
-	retval = checkServableResponse(request, 0)
-	assert.Equal(t, 0, retval)
 	retval = checkServableResponse(request, 101)
 	assert.Equal(t, 34, retval)
 	retval = checkServableResponse(request, 301)

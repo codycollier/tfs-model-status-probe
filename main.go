@@ -61,12 +61,23 @@ func checkServableResponse(response *tfproto.GetModelStatusResponse, modelVersio
 		return 11
 	}
 
-	// Get the state for the noted version. If no version, take the first.
+	// Get the state for the noted version. If no version, take any AVAILABLE.
 	var status tfproto.ModelVersionStatus_State
 	statusFound := false
 	if modelVersion == 0 {
-		status = response.ModelVersionStatus[0].State
-		statusFound = true
+		for _, res := range response.ModelVersionStatus {
+			if res.State == tfproto.ModelVersionStatus_AVAILABLE {
+				status = res.State
+				statusFound = true
+				break
+			}
+		}
+		// when no version is specified, and no model with state available is
+		// found, arbitrarily fallback to first (latest?) item in array
+		if !statusFound {
+			status = response.ModelVersionStatus[0].State
+			statusFound = true
+		}
 	} else {
 		for _, res := range response.ModelVersionStatus {
 			if modelVersion == res.Version {

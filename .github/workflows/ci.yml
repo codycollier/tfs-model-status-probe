@@ -10,17 +10,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  goreleaser:
+  citest:
     runs-on: ubuntu-latest
     steps:
 
     - name: Checkout
-      uses: actions/checkout@master
+      uses: actions/checkout@v3
 
     - name: Setup Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.15
+      uses: actions/setup-go@v3
 
     - name: Go Vet
       run: go vet -v ./...
@@ -29,7 +27,7 @@ jobs:
       run: go test -v .
 
     - name: GoReleaser
-      uses: goreleaser/goreleaser-action@v1
+      uses: goreleaser/goreleaser-action@v3
       with:
         version: latest
         args: release --snapshot --skip-publish --rm-dist

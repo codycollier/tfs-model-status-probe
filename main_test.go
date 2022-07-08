@@ -121,6 +121,85 @@ func TestResponseStateAvailable(t *testing.T) {
 	assert.Equal(t, 0, retval, "Expecting response code for state Available")
 }
 
+func TestResponseStateAvailableOnNoVersion(t *testing.T) {
+
+	// Ensure success when arbitrary version is available (ex: after a rollback)
+	request := &tfproto.GetModelStatusResponse{
+		ModelVersionStatus: []*tfproto.ModelVersionStatus{
+			{
+				Version: 101,
+				State:   tfproto.ModelVersionStatus_END,
+			},
+			{
+				Version: 98,
+				State:   tfproto.ModelVersionStatus_END,
+			},
+			{
+				Version: 301,
+				State:   tfproto.ModelVersionStatus_AVAILABLE,
+			},
+			{
+				Version: 303,
+				State:   tfproto.ModelVersionStatus_END,
+			},
+		},
+	}
+	retval := checkServableResponse(request, 0)
+	assert.Equal(t, 0, retval)
+
+	// Ensure order is not relevant
+	request = &tfproto.GetModelStatusResponse{
+		ModelVersionStatus: []*tfproto.ModelVersionStatus{
+			{
+				Version: 101,
+				State:   tfproto.ModelVersionStatus_AVAILABLE,
+			},
+			{
+				Version: 301,
+				State:   tfproto.ModelVersionStatus_END,
+			},
+		},
+	}
+	retval = checkServableResponse(request, 0)
+	assert.Equal(t, 0, retval)
+
+	request = &tfproto.GetModelStatusResponse{
+		ModelVersionStatus: []*tfproto.ModelVersionStatus{
+			{
+				Version: 301,
+				State:   tfproto.ModelVersionStatus_END,
+			},
+			{
+				Version: 101,
+				State:   tfproto.ModelVersionStatus_AVAILABLE,
+			},
+		},
+	}
+	retval = checkServableResponse(request, 0)
+	assert.Equal(t, 0, retval)
+
+	// Ensure still fails if there is no version which is available
+	request = &tfproto.GetModelStatusResponse{
+		ModelVersionStatus: []*tfproto.ModelVersionStatus{
+			{
+				Version: 101,
+				State:   tfproto.ModelVersionStatus_END,
+			},
+			{
+				Version: 301,
+				State:   tfproto.ModelVersionStatus_END,
+			},
+			{
+				Version: 303,
+				State:   tfproto.ModelVersionStatus_END,
+			},
+		},
+	}
+	retval = checkServableResponse(request, 0)
+	assert.Equal(t, 34, retval)
+
+}
+
 func TestResponseStateAvailableOnSpecificVersion(t *testing.T) {
 
 	request := &tfproto.GetModelStatusResponse{
@@ -135,9 +214,7 @@ func TestResponseStateAvailableOnSpecificVersion(t *testing.T) {
 			},
 		},
 	}
-	retval := checkServableResponse(request, 0)
-	assert.Equal(t, 34, retval)
-	retval = checkServableResponse(request, 101)
+	retval := checkServableResponse(request, 101)
 	assert.Equal(t, 34, retval)
 	retval = checkServableResponse(request, 301)
 	assert.Equal(t, 0, retval)
@@ -154,8 +231,6 @@ func TestResponseStateAvailableOnSpecificVersion(t *testing.T) {
 			},
 		},
 	}
-	retval = checkServableResponse(request, 0)
-	assert.Equal(t, 0, retval)
 	retval = checkServableResponse(request, 101)
 	assert.Equal(t, 34, retval)
 	retval = checkServableResponse(request, 301)
